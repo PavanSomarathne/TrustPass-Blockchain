@@ -1,4 +1,5 @@
 const { AuditLogBlockchain } = require('./chain.js');
+const models = require('./models');
 const logger = require('elogger');
 var cookieParser = require('cookie-parser');
 var path = require('path');
@@ -22,7 +23,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const mongouri = "mongodb+srv://ushan:ushan510@cluster0.ojvhn.mongodb.net/myFirstDatabase?retryWrites=true";
+const mongouri = "mongodb+srv://ushan:ushan510@cluster0.ojvhn.mongodb.net/trustPass_blockchain?retryWrites=true";
 //mongoDB Connection
 mongoose
   .connect(mongouri, {
@@ -38,12 +39,16 @@ mongoose
 
 //adding a block
 app.post("/blockchain/addBlock",async (req, res) => {
-  const requestToken = req.body;
   let blockChain = new AuditLogBlockchain();
    
   let entry = await blockChain.createTransaction(req.body);
-  console.log(req.body);
-  res.send("Success");
+  console.log(entry);
+  if (entry) {
+    res.send(entry);
+  }else{
+    res.send("Error");
+  }
+  
 });
 //validate the blockchain
 app.get("/blockchain/validate",async (req, res) => {
@@ -51,12 +56,25 @@ app.get("/blockchain/validate",async (req, res) => {
    
   let status = await blockChain.checkChainValidity();
 
-  console.log(`Chain Status: ${(status)?'SUCCESS':'FAILED'}`);
   if (status) {
     res.send("Good");
   }else{
     res.send("Vulnerable");
   }
+});
+
+//get a block in the blockchain
+app.post("/blockchain/getBlock",async (req, res) => {
+  
+  console.log(req.body);
+  models.AuditLogChain.findOne({_id:req.body.id}).then(function (single) {
+    console.log(single);
+    if (single) {
+      res.send(single);
+    }else{
+      res.send("Vulnerable");
+    }
+  });
 });
 
 // (async() => {
