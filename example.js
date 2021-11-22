@@ -36,6 +36,10 @@ mongoose
     console.log("MongoDB Connected…");
   })
   .catch((err) => console.log(err));
+//index route
+app.get("/",async (req, res) => {
+  return res.send("Welcome to Trust Pass blockchain API");
+});
 
 //adding a block
 app.post("/blockchain/addBlock",async (req, res) => {
